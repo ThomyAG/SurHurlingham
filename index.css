@@ -20,8 +20,9 @@
 .mainTitle {
     background-color: rgb(225, 225, 225);
     font-style: italic;
-    padding: 3%;
+    padding: 1%;
     font-size: 2rem;
+    text-align: center;
 }
 
 .presentacionSection {
