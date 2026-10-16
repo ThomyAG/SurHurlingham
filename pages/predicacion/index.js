@@ -18,20 +18,135 @@ fetch("./territorios.json")
         });
         terriContainer.addEventListener("click", showTerri);
     }
+
 function showTerri(e) {
-    if (e.target.classList.contains("buttonNumber")) {
-        const result = territories.data.find(terri => terri.id == e.target.id);
+    if (!e.target.classList.contains("buttonNumber")) return;
+
+    const result = territories.data.find(
+        terri => terri.id == e.target.id
+    );
+
+    // El territorio 1 usa el mapa real.
+    if (result.id == 1) {
         Swal.fire({
-            imageUrl: result.imgUrl,
-            imageWidth: result.imgUrl,
-            imageAlt: `Territorio ${result.id}`,
+            title: "Territorio 1",
+            html: '<div id="mapTerri"></div>',
+            width: "90vw",
             showCloseButton: true,
             showConfirmButton: true,
-            confirmButtonText: `<a href="${result.ruta}">¿Cómo llegar?</a>`,
-            customClass: "alertStyle"
+            confirmButtonText: "¿Cómo llegar?",
+            customClass: "alertStyle",
+
+            didOpen: async () => {
+                const map = L.map("mapTerri");
+
+                L.tileLayer(
+                    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                    {
+                        attribution: '&copy; OpenStreetMap contributors'
+                    }
+                ).addTo(map);
+
+                try {
+                    const respuesta = await fetch("./territorio-1.geojson");
+
+                    if (!respuesta.ok) {
+                        throw new Error("No se pudo cargar el mapa");
+                    }
+
+                    const datos = await respuesta.json();
+
+                    const manzanas = L.geoJSON(datos, {
+                        style: {
+                            color: "#513783",
+                            weight: 3,
+                            fillColor: "#9274c7",
+                            fillOpacity: 0.35
+                        },
+                        onEachFeature: (feature, layer) => {
+                            layer.bindTooltip(
+                                "Manzana " + feature.properties.manzana,
+                                { permanent: true, direction: "center" }
+                            );
+                        }
+                    }).addTo(map);
+
+                    map.fitBounds(manzanas.getBounds(), {
+                        padding: [20, 20]
+                    });
+
+                    // Ubicación GPS en vivo.
+                    let marcadorUsuario = null;
+                    let circuloPrecision = null;
+
+                    map.locate({
+                        watch: true,
+                        enableHighAccuracy: true
+                    });
+
+                    map.on("locationfound", (evento) => {
+                        const posicion = evento.latlng;
+
+                        if (!marcadorUsuario) {
+                            marcadorUsuario = L.circleMarker(posicion, {
+                                radius: 8,
+                                color: "#ffffff",
+                                weight: 3,
+                                fillColor: "#1685ff",
+                                fillOpacity: 1
+                            }).addTo(map);
+
+                            circuloPrecision = L.circle(posicion, {
+                                radius: evento.accuracy,
+                                color: "#1685ff",
+                                weight: 1,
+                                fillColor: "#1685ff",
+                                fillOpacity: 0.12
+                            }).addTo(map);
+                        } else {
+                            marcadorUsuario.setLatLng(posicion);
+                            circuloPrecision.setLatLng(posicion);
+                            circuloPrecision.setRadius(evento.accuracy);
+                        }
+                    });
+
+                    map.on("locationerror", () => {
+                        console.warn("No se pudo obtener la ubicación GPS.");
+                    });
+
+                    // Leaflet recalcula el tamaño al abrirse la ventana.
+                    setTimeout(() => map.invalidateSize(), 100);
+
+                } catch (error) {
+                    console.error(error);
+                    document.getElementById("mapTerri").innerHTML =
+                        "No se pudo cargar el mapa. Revisá tu conexión.";
+                }
+
+                // Guardamos el mapa para que el botón pueda abrir Google Maps.
+                window.mapaTerritorioActual = map;
+            },
+
+            preConfirm: () => {
+                window.open(result.ruta, "_blank", "noopener");
+                return false;
+            }
         });
+
+        return;
     }
+
+    // Los demás territorios conservan su comportamiento actual.
+    Swal.fire({
+        imageUrl: result.imgUrl,
+        imageAlt: `Territorio ${result.id}`,
+        showCloseButton: true,
+        showConfirmButton: true,
+        confirmButtonText: `<a href="${result.ruta}" target="_blank" rel="noopener">¿Cómo llegar?</a>`,
+        customClass: "alertStyle"
+    });
 }
+
 const inputs = document.querySelectorAll('.inputDay');
 
 let values = {

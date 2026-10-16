@@ -111,3 +111,10 @@
     text-decoration: none;
     color: rgb(250, 250, 250);
 }
+
+#mapTerri {
+    width: 100%;
+    height: 60vh;
+    min-height: 350px;
+    border-radius: 8px;
+}
