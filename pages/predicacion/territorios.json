@@ -7,7 +7,7 @@
     {
     "id": 2, 
     "imgUrl": "./../../terris/terri2.png", 
-    "ruta": "https://goo.gl/maps/AvdUweypwv1wzczc6"
+    "ruta": "https://maps.app.goo.gl/My8u4Bs3dnrrFdAGA"
     },
     {
     "id": 3, 
@@ -238,105 +238,5 @@
     {"id": 56, 
     "imgUrl": "./../../terris/terri56.png",
     "ruta": "https://goo.gl/maps/2dRu99WQ488a8qFbA"
-    },
-    {"id": 57, 
-    "imgUrl": "./../../terris/terri57.png",
-    "ruta": "https://goo.gl/maps/dYUGnCQ8YM43LJuR7"
-    },
-    {"id": 58, 
-    "imgUrl": "./../../terris/terri58.png",
-    "ruta": "https://goo.gl/maps/VhbVL6YVTW8TtR9bA"
-    },
-    {"id": 59, 
-    "imgUrl": "./../../terris/terri59.png",
-    "ruta": "https://goo.gl/maps/SGQhrVMeTBPqXjzX7"
-    },
-    {"id": 60, 
-    "imgUrl": "./../../terris/terri60.png",
-    "ruta": "https://goo.gl/maps/AQ74uPWQNNoyAmuCA"
-    },
-    {"id": 61, 
-    "imgUrl": "./../../terris/terri61.png",
-    "ruta": "https://goo.gl/maps/EqqPGQeidZYKDtUB9"
-    },
-    {"id": 62, 
-    "imgUrl": "./../../terris/terri62.png",
-    "ruta": "https://goo.gl/maps/uxvYscc8WD5duXN59"
-    },
-    {"id": 63, 
-    "imgUrl": "./../../terris/terri63.png",
-    "ruta": "https://goo.gl/maps/eqkw6NK7Kvm1qf4q6"
-    },
-    {"id": 64, 
-    "imgUrl": "./../../terris/terri64.png",
-    "ruta": "https://goo.gl/maps/ouNqtitgH1PpAZJu9"
-    },
-    {"id": 65, 
-    "imgUrl": "./../../terris/terri65.png",
-    "ruta": "https://goo.gl/maps/ouNqtitgH1PpAZJu9"
-    },
-    {"id": 66, 
-    "imgUrl": "./../../terris/terri66.png",
-    "ruta": "https://goo.gl/maps/ho6Rbx9yexbYr9xJ6"
-    },
-    {"id": 67, 
-    "imgUrl": "./../../terris/terri67.png",
-    "ruta": "https://goo.gl/maps/ho6Rbx9yexbYr9xJ6"
-    },
-    {"id": 68, 
-    "imgUrl": "./../../terris/terri68.png",
-    "ruta": "https://goo.gl/maps/DjPX1QPDuLbj53UU6"
-    },
-    {"id": 69, 
-    "imgUrl": "./../../terris/terri69.png",
-    "ruta": "https://goo.gl/maps/jphyU2Rz268aiQTb8"
-    },
-    {"id": 70, 
-    "imgUrl": "./../../terris/terri70.png",
-    "ruta": "https://goo.gl/maps/jphyU2Rz268aiQTb8"
-    },
-    {"id": 71, 
-    "imgUrl": "./../../terris/terri71.png",
-    "ruta": "https://goo.gl/maps/D5AqpG5bzqu85p1m6"
-    },
-    {"id": 72, 
-    "imgUrl": "./../../terris/terri72.png",
-    "ruta": "https://goo.gl/maps/wxLPxkUaxJcxPh4eA"
-    },
-    {"id": 73, 
-    "imgUrl": "./../../terris/terri73.png",
-    "ruta": "https://goo.gl/maps/VEa9mKRcJVTtg1ZQ9"
-    },
-    {"id": 74, 
-    "imgUrl": "./../../terris/terri74.png",
-    "ruta": "https://goo.gl/maps/4ftooCU9PqH5Nx8m8"
-    },
-    {"id": 75, 
-    "imgUrl": "./../../terris/terri75.png",
-    "ruta": "https://goo.gl/maps/HFQFmZa9yRgC9T5d8"
-    },
-    {"id": 76, 
-    "imgUrl": "./../../terris/terri76.png",
-    "ruta": "https://goo.gl/maps/Sg8MRHf8T3UyHaqcA"
-    },
-    {"id": 77, 
-    "imgUrl": "./../../terris/terri77.png",
-    "ruta": "https://goo.gl/maps/UyvwbKMWvEMBQGSS9"
-    },
-    {"id": 78, 
-    "imgUrl": "./../../terris/terri78.png",
-    "ruta": "https://goo.gl/maps/D4yWsH5CeoRbFNWy5"
-    },
-    {"id": 79, 
-    "imgUrl": "./../../terris/terri79.png",
-    "ruta": "https://goo.gl/maps/yePVhfG7yJ4h6pFm8"
-    },
-    {"id": 80, 
-    "imgUrl": "./../../terris/terri80.png",
-    "ruta": "https://goo.gl/maps/KSCZe8zjP28fkFnQ8"
-    },
-    {"id": 81, 
-    "imgUrl": "./../../terris/terri81.png",
-    "ruta": "https://goo.gl/maps/2RZBLsLxN8fpcp6k6"
     }
 ]

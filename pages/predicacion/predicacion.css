@@ -16,7 +16,7 @@
 }
 
 .imgSalida {
-    width: 70%;
+    width: 100%;
     border: solid 2px black;
 }
 
@@ -96,6 +96,10 @@
     border: 2px solid black;
 }
 
+.swal2-image {
+    max-width: 100%;
+    height: auto;
+}
 
 /*  ALERTA  */
 
