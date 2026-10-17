@@ -30,7 +30,15 @@ function showTerri(e) {
     if (result.id == 1) {
         Swal.fire({
             title: "Territorio 1",
-            html: '<div id="mapTerri"></div>',
+            html: `
+                <div id="mapWrap">
+                    <div id="mapTerri"></div>
+                    <div id="flechaBrujula">▲</div>
+                    <button id="activarBrujula" type="button">
+                        Activar brújula
+                    </button>
+                </div>
+`,
             width: "90vw",
             showCloseButton: true,
             showConfirmButton: true,
@@ -39,6 +47,69 @@ function showTerri(e) {
 
             didOpen: async () => {
                 const map = L.map("mapTerri");
+
+                const botonBrujula = document.getElementById("activarBrujula");
+                const flechaBrujula = document.getElementById("flechaBrujula");
+
+                let escuchandoBrujula = false;
+
+                function actualizarBrujula(evento) {
+                    let rumbo = null;
+
+                    // Safari en iPhone puede proporcionar el rumbo directo.
+                    if (typeof evento.webkitCompassHeading === "number") {
+                        rumbo = evento.webkitCompassHeading;
+                    } else if (
+                        evento.absolute === true &&
+                        typeof evento.alpha === "number"
+                    ) {
+                        rumbo = (360 - evento.alpha) % 360;
+                    }
+
+                    if (rumbo !== null) {
+                        flechaBrujula.style.transform =
+                            `translate(-50%, -50%) rotate(${rumbo}deg)`;
+
+                        flechaBrujula.style.display = "block";
+                        botonBrujula.textContent = "Brújula activada";
+                    }
+                }
+
+                botonBrujula.addEventListener("click", async () => {
+                    try {
+                        // Algunos iPhone requieren permiso tras tocar el botón.
+                        if (
+                            typeof DeviceOrientationEvent !== "undefined" &&
+                            typeof DeviceOrientationEvent.requestPermission === "function"
+                        ) {
+                            const permiso =
+                                await DeviceOrientationEvent.requestPermission();
+
+                            if (permiso !== "granted") {
+                                botonBrujula.textContent = "Permiso no concedido";
+                                return;
+                            }
+                        }
+
+                        if (!escuchandoBrujula) {
+                            window.addEventListener(
+                                "deviceorientation",
+                                actualizarBrujula
+                            );
+
+                            window.addEventListener(
+                                "deviceorientationabsolute",
+                                actualizarBrujula
+                            );
+
+                            escuchandoBrujula = true;
+                            botonBrujula.textContent = "Buscando orientación...";
+                        }
+                    } catch (error) {
+                        console.error("Error al activar la brújula:", error);
+                        botonBrujula.textContent = "No se pudo activar";
+                    }
+                });
 
                 L.tileLayer(
                     "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
