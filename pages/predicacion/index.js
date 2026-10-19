@@ -19,6 +19,7 @@ fetch("./territorios.json")
         terriContainer.addEventListener("click", showTerri);
     }
 
+
 function showTerri(e) {
     if (!e.target.classList.contains("buttonNumber")) return;
 
@@ -26,100 +27,180 @@ function showTerri(e) {
         terri => terri.id == e.target.id
     );
 
-    // El territorio 1 usa el mapa real.
+    if (!result) return;
+
+    // Territorio 1: mapa real con GPS y brújula.
     if (result.id == 1) {
+        let mapa = null;
+        let marcadorUsuario = null;
+        let circuloPrecision = null;
+        let escuchandoBrujula = false;
+        let orientacionActual = 0;
+        let limpiarBrujula = null;
+        let ultimoRumbo = null;
+
         Swal.fire({
             title: "Territorio 1",
             html: `
                 <div id="mapWrap">
                     <div id="mapTerri"></div>
-                    <div id="flechaBrujula">▲</div>
                     <button id="activarBrujula" type="button">
                         Activar brújula
                     </button>
+                    <p id="estadoBrujula">
+                        Esperando ubicación...
+                    </p>
                 </div>
-`,
+            `,
             width: "90vw",
             showCloseButton: true,
             showConfirmButton: true,
             confirmButtonText: "¿Cómo llegar?",
             customClass: "alertStyle",
-
             didOpen: async () => {
-                const map = L.map("mapTerri");
+                const botonBrujula =
+                    document.getElementById("activarBrujula");
+                const estadoBrujula =
+                    document.getElementById("estadoBrujula");
+                mapa = L.map("mapTerri");
+                L.tileLayer(
+                    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                    {
+                        attribution: "&copy; OpenStreetMap contributors"
+                    }
+                ).addTo(mapa);
+                // Un único marcador con flecha integrada.
+                function crearIconoUbicacion(rumbo = 0) {
+                    return L.divIcon({
+                        className: "iconoUbicacion",
+                        html: `
+                            <div class="ubicacionRotable"
+                                style="transform: rotate(${rumbo}deg)">
+                                <svg viewBox="0 0 48 48"
+                                    width="48" height="48"
+                                    aria-label="Tu ubicación y orientación">
+                                    <path d="M24 2 L34 27 L24 22 L14 27 Z"
+                                        fill="#1685ff"
+                                        stroke="white"
+                                        stroke-width="2.5"
+                                        stroke-linejoin="round"/>
+                                    <circle cx="24" cy="27" r="9"
+                                            fill="#1685ff"
+                                            stroke="white"
+                                            stroke-width="3"/>
+                                    <circle cx="24" cy="27" r="3"
+                                            fill="white"/>
+                                </svg>
+                            </div>
+                        `,
+                        iconSize: [48, 48],
+                        iconAnchor: [24, 27]
+                    });
+                }
 
-                const botonBrujula = document.getElementById("activarBrujula");
-                const flechaBrujula = document.getElementById("flechaBrujula");
-
-                let escuchandoBrujula = false;
-
-                function actualizarBrujula(evento) {
+                function actualizarOrientacion(evento) {
                     let rumbo = null;
 
-                    // Safari en iPhone puede proporcionar el rumbo directo.
-                    if (typeof evento.webkitCompassHeading === "number") {
+                    if (
+                        typeof evento.webkitCompassHeading === "number"
+                    ) {
                         rumbo = evento.webkitCompassHeading;
                     } else if (
                         evento.absolute === true &&
                         typeof evento.alpha === "number"
                     ) {
-                        rumbo = (360 - evento.alpha) % 360;
+                        rumbo = (360 - evento.alpha + 360) % 360;
                     }
 
-                    if (rumbo !== null) {
-                        flechaBrujula.style.transform =
-                            `translate(-50%, -50%) rotate(${rumbo}deg)`;
+                    if (rumbo === null) return;
 
-                        flechaBrujula.style.display = "block";
-                        botonBrujula.textContent = "Brújula activada";
+                    ultimoRumbo = rumbo;
+
+                    if (marcadorUsuario) {
+                        marcadorUsuario.setIcon(
+                            crearIconoUbicacion(rumbo)
+                        );
                     }
+
+                    estadoBrujula.textContent = "Brújula activada";
+                    botonBrujula.style.display = "none";
+                }
+                limpiarBrujula = () => {
+                    window.removeEventListener(
+                        "deviceorientation",
+                        actualizarOrientacion
+                    );
+
+                    window.removeEventListener(
+                        "deviceorientationabsolute",
+                        actualizarOrientacion
+                    );
+                };
+                function iniciarEscuchaOrientacion() {
+                    if (escuchandoBrujula) return;
+
+                    window.addEventListener(
+                        "deviceorientation",
+                        actualizarOrientacion
+                    );
+
+                    window.addEventListener(
+                        "deviceorientationabsolute",
+                        actualizarOrientacion
+                    );
+
+                    escuchandoBrujula = true;
+                    estadoBrujula.textContent =
+                        "Buscando orientación del teléfono...";
                 }
 
-                botonBrujula.addEventListener("click", async () => {
+                async function activarBrujula() {
                     try {
-                        // Algunos iPhone requieren permiso tras tocar el botón.
                         if (
                             typeof DeviceOrientationEvent !== "undefined" &&
-                            typeof DeviceOrientationEvent.requestPermission === "function"
+                            typeof DeviceOrientationEvent.requestPermission ===
+                                "function"
                         ) {
                             const permiso =
                                 await DeviceOrientationEvent.requestPermission();
 
                             if (permiso !== "granted") {
-                                botonBrujula.textContent = "Permiso no concedido";
+                                estadoBrujula.textContent =
+                                    "No se concedió permiso para la brújula.";
                                 return;
                             }
                         }
 
-                        if (!escuchandoBrujula) {
-                            window.addEventListener(
-                                "deviceorientation",
-                                actualizarBrujula
-                            );
-
-                            window.addEventListener(
-                                "deviceorientationabsolute",
-                                actualizarBrujula
-                            );
-
-                            escuchandoBrujula = true;
-                            botonBrujula.textContent = "Buscando orientación...";
-                        }
+                        iniciarEscuchaOrientacion();
                     } catch (error) {
-                        console.error("Error al activar la brújula:", error);
-                        botonBrujula.textContent = "No se pudo activar";
-                    }
-                });
+                        console.warn(
+                            "No se pudo activar la brújula:",
+                            error
+                        );
 
-                L.tileLayer(
-                    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                    {
-                        attribution: '&copy; OpenStreetMap contributors'
+                        estadoBrujula.textContent =
+                            "No se pudo activar la brújula en este navegador.";
                     }
-                ).addTo(map);
+                }
+
+                botonBrujula.addEventListener(
+                    "click",
+                    activarBrujula
+                );
+
+                // Intentar activarla automáticamente cuando sea posible.
+                // Si el navegador exige un toque, quedará el botón disponible.
+                if (
+                    typeof DeviceOrientationEvent !== "undefined" &&
+                    typeof DeviceOrientationEvent.requestPermission !==
+                        "function"
+                ) {
+                    iniciarEscuchaOrientacion();
+                }
 
                 try {
-                    const respuesta = await fetch("./territorio-1.geojson");
+                    const respuesta =
+                        await fetch("./territorio-1.geojson");
 
                     if (!respuesta.ok) {
                         throw new Error("No se pudo cargar el mapa");
@@ -137,35 +218,30 @@ function showTerri(e) {
                         onEachFeature: (feature, layer) => {
                             layer.bindTooltip(
                                 "Manzana " + feature.properties.manzana,
-                                { permanent: true, direction: "center" }
+                                {
+                                    permanent: true,
+                                    direction: "center"
+                                }
                             );
                         }
-                    }).addTo(map);
+                    }).addTo(mapa);
 
-                    map.fitBounds(manzanas.getBounds(), {
+                    mapa.fitBounds(manzanas.getBounds(), {
                         padding: [20, 20]
                     });
 
-                    // Ubicación GPS en vivo.
-                    let marcadorUsuario = null;
-                    let circuloPrecision = null;
-
-                    map.locate({
-                        watch: true,
-                        enableHighAccuracy: true
-                    });
-
-                    map.on("locationfound", (evento) => {
+                    // Seguimiento continuo de la ubicación.
+                    mapa.on("locationfound", evento => {
                         const posicion = evento.latlng;
 
                         if (!marcadorUsuario) {
-                            marcadorUsuario = L.circleMarker(posicion, {
-                                radius: 8,
-                                color: "#ffffff",
-                                weight: 3,
-                                fillColor: "#1685ff",
-                                fillOpacity: 1
-                            }).addTo(map);
+                            marcadorUsuario = L.marker(posicion, {
+                                icon: crearIconoUbicacion(
+                                    ultimoRumbo ?? orientacionActual
+                                ),
+                                interactive: false,
+                                zIndexOffset: 1000
+                            }).addTo(mapa);
 
                             circuloPrecision = L.circle(posicion, {
                                 radius: evento.accuracy,
@@ -173,7 +249,7 @@ function showTerri(e) {
                                 weight: 1,
                                 fillColor: "#1685ff",
                                 fillOpacity: 0.12
-                            }).addTo(map);
+                            }).addTo(mapa);
                         } else {
                             marcadorUsuario.setLatLng(posicion);
                             circuloPrecision.setLatLng(posicion);
@@ -181,22 +257,45 @@ function showTerri(e) {
                         }
                     });
 
-                    map.on("locationerror", () => {
-                        console.warn("No se pudo obtener la ubicación GPS.");
+                    mapa.on("locationerror", (evento) => {
+                        console.warn(
+                            "No se pudo obtener la ubicación:",
+                            evento.message
+                        );
+
+                        mapa.stopLocate();
+
+                        estadoBrujula.textContent =
+                            "Mapa disponible. Ubicación GPS no habilitada.";
                     });
 
-                    // Leaflet recalcula el tamaño al abrirse la ventana.
-                    setTimeout(() => map.invalidateSize(), 100);
+                    mapa.locate({
+                        watch: true,
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 5000
+                    });
 
+                    setTimeout(() => mapa.invalidateSize(), 100);
                 } catch (error) {
                     console.error(error);
                     document.getElementById("mapTerri").innerHTML =
                         "No se pudo cargar el mapa. Revisá tu conexión.";
                 }
-
-                // Guardamos el mapa para que el botón pueda abrir Google Maps.
-                window.mapaTerritorioActual = map;
             },
+
+willClose: () => {
+    if (limpiarBrujula) {
+        limpiarBrujula();
+    }
+
+    if (mapa) {
+        mapa.stopLocate();
+        mapa.off();
+        mapa.remove();
+        mapa = null;
+    }
+},
 
             preConfirm: () => {
                 window.open(result.ruta, "_blank", "noopener");
@@ -207,16 +306,18 @@ function showTerri(e) {
         return;
     }
 
-    // Los demás territorios conservan su comportamiento actual.
+    // Los demás territorios conservan su comportamiento.
     Swal.fire({
         imageUrl: result.imgUrl,
         imageAlt: `Territorio ${result.id}`,
         showCloseButton: true,
         showConfirmButton: true,
-        confirmButtonText: `<a href="${result.ruta}" target="_blank" rel="noopener">¿Cómo llegar?</a>`,
+        confirmButtonText:
+            `<a href="${result.ruta}" target="_blank" rel="noopener">¿Cómo llegar?</a>`,
         customClass: "alertStyle"
     });
 }
+
 
 const inputs = document.querySelectorAll('.inputDay');
 
